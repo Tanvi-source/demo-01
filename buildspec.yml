@@ -3,10 +3,10 @@ version: 0.2
 phases:
   install:
     commands:
-      - echo "Installing Terraform..."
-      - dnf install -y dnf-plugins-core
-      - dnf config-manager --add-repo https://rpm.releases.hashicorp.com/RHEL/9/hashicorp.repo
-      - dnf install -y terraform
+      - echo "Installing Terraform manually for AL2023..."
+      - curl -O https://releases.hashicorp.com/terraform/1.9.8/terraform_1.9.8_linux_amd64.zip
+      - unzip terraform_1.9.8_linux_amd64.zip
+      - mv terraform /usr/local/bin/
       - terraform -version
 
   pre_build:
@@ -16,17 +16,13 @@ phases:
 
   build:
     commands:
-      - echo "Running Terraform fmt..."
+      - echo "Running terraform fmt..."
       - terraform fmt -write=true
-      - echo "Running Terraform plan..."
+      - echo "Running terraform plan..."
       - terraform plan -input=false -out=tfplan
 
   post_build:
     commands:
-      - echo "Applying Terraform plan..."
+      - echo "Applying terraform plan..."
       - terraform apply -input=false -auto-approve tfplan
-      - echo "Terraform apply completed successfully!"
-
-artifacts:
-  files:
-    - '**/*'
+      - echo "Terraform apply completed!"
