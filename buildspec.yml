@@ -4,8 +4,8 @@ phases:
   install:
     commands:
       - echo "========= INSTALL PHASE ========="
-      - echo "Installing unzip and curl..."
-      - dnf install -y --allowerasing unzip curl
+      - echo "Installing unzip and curl with conflict resolution..."
+      - dnf install -y --allowerasing --skip-broken unzip curl
 
       - echo "Downloading Terraform 1.9.8..."
       - curl -O https://releases.hashicorp.com/terraform/1.9.8/terraform_1.9.8_linux_amd64.zip
@@ -17,25 +17,24 @@ phases:
       - mv -f terraform /usr/local/bin/
       - chmod +x /usr/local/bin/terraform
 
-      - echo "Terraform version installed:"
       - terraform version
 
   pre_build:
     commands:
-      - echo "========= PRE-BUILD PHASE ========="
       - echo "Initializing Terraform..."
       - terraform init
 
   build:
     commands:
-      - echo "========= BUILD PHASE ========="
-      - echo "Running Terraform FMT..."
       - terraform fmt -write=true
-
-      - echo "Validating Terraform configuration..."
       - terraform validate
-
-      - echo "Generating Terraform plan..."
       - terraform plan -input=false -out=tfplan
 
-  po
+  post_build:
+    commands:
+      - terraform apply -input=false -auto-approve tfplan
+      - echo "Terraform apply completed."
+
+artifacts:
+  files:
+    - "**/*"
